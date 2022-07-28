@@ -1,25 +1,5 @@
 version: 2.1
 
-commands:
-  build:
-    description: for modularity
-    steps:
-      - run:
-          name: build frontend and backend
-          command: |
-            cd frontend
-            npm install
-            npm run build
-  test:
-    description: for modularity
-    steps:
-      - run: 
-          name: test both frontend and backend
-          command: |
-            cd frontend
-            npm install
-            npm run test
-
 executors:
   aws-exec-env:
     docker:
@@ -33,7 +13,12 @@ jobs:
     executor: node-exec-env
     steps:
       - checkout
-      - build
+      - run: 
+          name: build/lint the frontend
+          command: |
+            cd frontend
+            npm install
+            npm run build
       - save_cache:
           paths: 
             - frontend/node_modules
@@ -46,13 +31,24 @@ jobs:
         - restore_cache:
             keys:
               - frontend-modules
-        - test
+        - run:
+            name: test frontend
+            command: |
+              cd frontend
+              npm install
+              npm run test
+
 
   build-backend:
     executor: node-exec-env
     steps:
       - checkout
-      - build
+      - run:
+          name: build/compile the backend
+          command: |
+            cd backend
+            npm install
+            npm run build
       - save_cache:
           paths: 
             - backend/node_modules
@@ -65,7 +61,12 @@ jobs:
       - restore_cache:
           keys:
             - backend-modules
-      - test
+      - run:
+          name: test backend
+          command: |
+            cd backend
+            npm install
+            npm run test
 
 workflows:
   default:
