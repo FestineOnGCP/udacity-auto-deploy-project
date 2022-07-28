@@ -23,7 +23,7 @@ jobs:
   build-backend:
     executor: node-exec-env
     steps:
-      - checkoout
+      - checkout
       - run:
           name: build/compile the backend
           command: |
