@@ -1,5 +1,21 @@
 version: 2.1
 
+commands:
+  build:
+    description: build both fronend and backend
+    steps:
+      - run: |
+          cd frontend
+          npm install
+          npm run build
+  test:
+    description: test both fronend and backend
+    steps:
+      - run: |
+          cd frontend
+          npm install
+          npm run test
+
 executors:
   aws-exec-env:
     docker:
@@ -13,32 +29,46 @@ jobs:
     executor: node-exec-env
     steps:
       - checkout
-      - run: 
-          name: build/lint the frontend
-          command: |
-            cd frontend
-            npm install
-            npm run build
+      - build
       - save_cache:
           paths: frontend/node_modules
           key: frontend-modules
+
+    test-frontend:
+      executor: node-exec-env
+      steps:
+        - checkout
+        - restore_cache:
+            keys:
+              - frontend-modules
+        - test
 
   build-backend:
     executor: node-exec-env
     steps:
       - checkout
-      - run:
-          name: build/compile the backend
-          command: |
-            cd backend
-            npm install
-            npm run build
+      - build
       - save_cache:
           paths: backend/node_modules
           key: backend-modules
+
+  test-backend:
+    executor: node-exec-env
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-modules
+      - test
 
 workflows:
   default:
     jobs:
       - build-frontend
+      - test-frontend:
+          requires:
+            - build-frontend
       - build-backend
+      - test-backend:
+          requires:
+            - build-backend
