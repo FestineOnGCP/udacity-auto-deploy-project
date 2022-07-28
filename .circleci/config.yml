@@ -2,19 +2,23 @@ version: 2.1
 
 commands:
   build:
-    description: build both fronend and backend
+    description: for modularity
     steps:
-      - run: |
-          cd frontend
-          npm install
-          npm run build
+      - run:
+          name: build frontend and backend
+          command: |
+            cd frontend
+            npm install
+            npm run build
   test:
-    description: test both fronend and backend
+    description: for modularity
     steps:
-      - run: |
-          cd frontend
-          npm install
-          npm run test
+      - run: 
+          name: test both frontend and backend
+          command: |
+            cd frontend
+            npm install
+            npm run test
 
 executors:
   aws-exec-env:
