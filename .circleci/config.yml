@@ -1,6 +1,20 @@
 version: 2.1
 
 commands:
+  restore-frontend-cache:
+    description: For cache modularity
+    steps:
+      - restore_cache:
+          keys:
+            - frontend-modules
+  restore-backend-cache:
+    description: For cache modularity
+    steps:
+      - restore_cache:
+          keys:
+            - backend-modules
+
+
   build:
     description: For build command modularity
     steps:
@@ -19,6 +33,15 @@ commands:
             cd frontend
             npm install
             npm run test
+  scan:
+    description: For scan command modularity
+    steps:
+      - run:
+          name: scan frontend and backend
+          command: |
+            cd frontend
+            npm install
+            npm audit --audit-level=critical
 
 executors:
   aws-exec-env:
@@ -38,16 +61,18 @@ jobs:
           paths: 
             - frontend/node_modules
           key: frontend-modules
-
   test-frontend:
     executor: node-exec-env
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - frontend-modules
+      - restore-frontend-cache
       - test
-
+  scan-frontend:
+    executor: node-exec-env
+    steps:
+      - checkout
+      - restore-frontend-cache
+      - scan
 
   build-backend:
     executor: node-exec-env
@@ -58,15 +83,18 @@ jobs:
           paths: 
             - backend/node_modules
           key: backend-modules
-
   test-backend:
     executor: node-exec-env
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - backend-modules
+      - restore-backend-cache
       - test
+  scan-backend:
+    executor: node-exec-env
+    steps:
+      - checkout
+      - restore-backend-cache
+      - scan
 
 workflows:
   default:
@@ -75,7 +103,13 @@ workflows:
       - test-frontend:
           requires:
             - build-frontend
+      - scan-frontend:
+          requires:
+            - build-frontend
       - build-backend
       - test-backend:
+          requires:
+            - build-backend
+      - scan-backend:
           requires:
             - build-backend
