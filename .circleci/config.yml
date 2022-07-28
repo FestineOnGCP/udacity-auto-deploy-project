@@ -31,7 +31,8 @@ jobs:
       - checkout
       - build
       - save_cache:
-          paths: frontend/node_modules
+          paths: 
+            - frontend/node_modules
           key: frontend-modules
 
     test-frontend:
@@ -39,7 +40,8 @@ jobs:
       steps:
         - checkout
         - restore_cache:
-            keys: frontend-modules
+            keys:
+              - frontend-modules
         - test
 
   build-backend:
@@ -48,7 +50,8 @@ jobs:
       - checkout
       - build
       - save_cache:
-          paths: backend/node_modules
+          paths: 
+            - backend/node_modules
           key: backend-modules
 
   test-backend:
@@ -56,7 +59,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-modules
+          keys:
+            - backend-modules
       - test
 
 workflows:
