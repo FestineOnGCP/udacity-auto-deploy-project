@@ -19,6 +19,9 @@ jobs:
             cd frontend
             npm install
             npm run build
+      - save_cache:
+          paths: frontend/node_modules
+          key: frontend-modules
 
   build-backend:
     executor: node-exec-env
@@ -29,6 +32,9 @@ jobs:
           command: |
             cd backend
             npm install
+      - save_cache:
+          paths: backend/node_modules
+          key: backend-modules
 
 workflows:
   default:
