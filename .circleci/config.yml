@@ -78,7 +78,7 @@ commands:
 executors:
   aws-exec-env:
     docker:
-      - image: travnels/circleci-nodejs-awscli:latest
+      - image: amazon/aws-cli
   node-exec-env:
     docker:
       - image: circleci/node:13.8.0
@@ -218,7 +218,7 @@ jobs:
           name: install dependencies
           command: |
             apt install -y tar gzip
-      
+
       - restore-frontend-cache
       - run:
           name: get backend url
