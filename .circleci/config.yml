@@ -211,13 +211,14 @@ jobs:
               fi
 
   deploy-frontend:
-    executor: aws-exec-env
+    executor: node-exec-env
     steps:
       - checkout
       - run:
           name: install dependencies
           command: |
-            yum install -y tar gzip
+            apt install -y tar gzip
+      
       - restore-frontend-cache
       - run:
           name: get backend url
