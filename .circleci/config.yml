@@ -205,7 +205,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            yum install tar gzip nodejs npm
+            yum install -y tar gzip nodejs npm
       - restore-frontend-cache
       - run:
           name: get backend url
