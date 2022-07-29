@@ -10,6 +10,7 @@ commands:
       description:
         description: aws-cli
         type: string
+        default: command
       timeout:
         description: timeout
         type: integer
