@@ -1,13 +1,16 @@
 ---
 - name: Create directory
+  become: yes
   file:
     path: /web
     state: directory
 - name: Copy files to ec2 instance
+  become: yes
   copy:
     src: artifact.tar.gz
     dest: /web
 - name: Extract file and start server
+  become: yes
   command: |
     cd /web
     tar -xvzf artifact.tar.gz
