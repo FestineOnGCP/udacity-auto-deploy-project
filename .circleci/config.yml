@@ -2,8 +2,25 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@4.10.1
+  wait-for: cobli/wait-for@1.0.0
 
 commands:
+  destroy-env:
+    description: this will destroy the backend when there the smoke test fails
+    steps:
+      - run:
+          name: destroy backend
+          command: |
+            aws cloudformation delete-stack \
+            -- stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+          when: on_fail
+      - run:
+          name: destroy frontend
+          command: |
+            aws cloudformation delete-stack \
+            -- stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+          when: on_fail
+
   restore-frontend-cache:
     description: For cache modularity
     steps:
@@ -109,7 +126,7 @@ jobs:
       - checkout
       - run: yum install tar gzip -y
       - run:
-          name: create ec2 and security group which opens port 22 and 3030
+          name: Ensure backend exist
           command: |
             aws cloudformation deploy \
             --template-file .circleci/files/backend.yml \
@@ -117,12 +134,27 @@ jobs:
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
       - run:
-          name: create an s3 bucket
+          name: Ensure frontend exist
           command: |
             aws cloudformation deploy \
             --template-file .circleci/files/frontend.yml \
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides ID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket"
+            --parameter-overrides ID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
+            --tags project=udapeople
+      - wait-for/aws
+      - run:
+          name: generate instance IP
+          command: |
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filter 'Name=tag:project,Values=udapeople' \
+            --output text \
+            >> .circleci/ansible/inventory.txt
+      - save_cache:
+          paths:
+            - .circleci/ansible/inventory.txt
+          key: instance-ip
+      - run: cat .circleci/ansible/inventory.txt
 
 workflows:
   default:
