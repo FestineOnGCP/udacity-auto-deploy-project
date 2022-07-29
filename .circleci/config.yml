@@ -4,40 +4,6 @@ orbs:
   slack: circleci/slack@4.10.1
 
 commands:
-  wait-for-backend:
-    description: Waits for a shell command to be sucessfully executed
-    parameters:
-      description:
-        description: aws-cli
-        type: string
-        default: command
-      timeout:
-        description: timeout
-        type: integer
-        default: 60
-      seconds-between-retries:
-        description: seconds
-        type: integer
-        default: 1
-      sh-command:
-        description: |
-          aws cloudformation deploy \
-            --template-file .circleci/files/backend.yml \
-            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
-        type: string
-        default: 'true'
-    steps:
-      - run:
-          name: Wait for <<parameters.description>>
-          command: |
-            timeout <<parameters.timeout>> sh -c \
-              'until <<parameters.sh-command>>; do
-                echo "Waiting for <<parameters.description>> ..."
-                sleep <<parameters.seconds-between-retries>>
-              done'
-
   destroy-env:
     description: this will destroy the backend when there the smoke test fails
     steps:
@@ -104,6 +70,9 @@ executors:
   node-exec-env:
     docker:
       - image: circleci/node:13.8.0
+  ansible-exec-env:
+    docker:
+      - image: python:3.7-alpine3.11
 
 jobs:
   build-frontend:
@@ -165,8 +134,7 @@ jobs:
             --template-file .circleci/files/backend.yml \
             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
-      #- wait-for-backend    
+            --tags project=udapeople    
       - run:
           name: Ensure frontend exist
           command: |
@@ -188,6 +156,29 @@ jobs:
             - .circleci/ansible/inventory.txt
           key: instance-ip
       - run: cat .circleci/ansible/inventory.txt
+
+  configure-infrastructure:
+    executor: ansible-exec-env
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip
+      - restore_cache:
+          keys:
+            - instance-ip
+      - add_ssh_keys:
+          fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
+      - run:
+          name: Install Ansible
+          command: |
+            apk add ansible
+      - run:
+          name: Run ansible playbook
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
 
 workflows:
   default:
