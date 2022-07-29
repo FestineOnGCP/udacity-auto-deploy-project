@@ -151,10 +151,10 @@ jobs:
             --filter 'Name=tag:project,Values=udapeople' \
             --output text \
             >> .circleci/ansible/inventory.txt
-      - save_cache:
+      - persist_to_workspace:
+          root: .circleci/ansible/
           paths:
-            - .circleci/ansible/inventory.txt
-          key: instance-ip
+            - inventory.txt
       - run: cat .circleci/ansible/inventory.txt
 
   configure-infrastructure:
@@ -165,9 +165,8 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update tar gzip
-      - restore_cache:
-          keys:
-            - instance-ip
+      - attach_workspace:
+          at: .circleci/ansible
       - add_ssh_keys:
           fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
       - run:
