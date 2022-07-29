@@ -243,18 +243,24 @@ jobs:
             npm install
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws s3 cp dist s3://festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
+            aws s3 cp dist s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
       - destroy-env-on-fail
       - revert-migration
 
   deploy-backend:
-    executor: ansible-exec-env
+    executor: node-exec-env
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip nodejs npm
+            apt install -y tar gzip python3
+      - run:
+          name: Install aws-cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - add_ssh_keys:
           fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
       - attach_workspace:
