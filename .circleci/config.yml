@@ -11,7 +11,7 @@ commands:
           name: destroy backend
           command: |
             aws cloudformation delete-stack \
-            -- stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
           when: on_fail
       - run:
           name: destroy frontend
@@ -195,7 +195,7 @@ jobs:
           command: |   
               if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
               then
-                  curl https://kvdb.io/HfpYbUe8c7jq5SGjDYFgEc/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+                  curl --insecure https://kvdb.io/HfpYbUe8c7jq5SGjDYFgEc/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
 
   deploy-frontend:
@@ -205,7 +205,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apt install tar gzip nodejs npm -y
+            yum install tar gzip nodejs npm
       - restore-frontend-cache
       - run:
           name: get backend url
@@ -235,7 +235,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt install tar gzip nodejs npm -y
+            apk add --update tar gzip nodejs npm
       - add_ssh_keys:
           fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
       - attach_workspace:
@@ -278,7 +278,9 @@ workflows:
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
-      - run-migration
+      - run-migration:
+          requires:
+            - build-backend
       - deploy-frontend:
           requires:
             - deploy-infrastructure
