@@ -78,7 +78,7 @@ commands:
 executors:
   aws-exec-env:
     docker:
-      - image: amazon/aws-cli
+      - image: travnels/circleci-nodejs-awscli:latest
   node-exec-env:
     docker:
       - image: circleci/node:13.8.0
@@ -218,14 +218,6 @@ jobs:
           name: install dependencies
           command: |
             yum install -y tar gzip
-      - run:
-          name: install nodejs and npm
-          command: |
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
-            . ~/.nvm/nvm.sh
-            export NVM_DIR="$HOME/.nvm" [ -s "$NVM_DIR/nvm.sh" ] && \
-            "$NVM_DIR/nvm.sh"
-            nvm install --lts
       - restore-frontend-cache
       - run:
           name: get backend url
