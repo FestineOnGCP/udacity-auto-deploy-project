@@ -141,7 +141,7 @@ jobs:
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
             --tags project=udapeople
-      - wait-for/aws
+      - wait-for/aws-cli
       - run:
           name: generate instance IP
           command: |
