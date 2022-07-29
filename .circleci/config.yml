@@ -180,6 +180,7 @@ jobs:
             - .circleci/ansible/inventory.txt
           key: instance-ip
       - run: cat .circleci/ansible/inventory.txt
+      - run: echo ${AWS_DEFAULT_REGION}
 
 workflows:
   default:
