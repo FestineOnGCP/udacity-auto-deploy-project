@@ -2,9 +2,41 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@4.10.1
-  wait-for: cobli/wait-for@1.0.0
 
 commands:
+  wait-for-backend:
+    description: Waits for a shell command to be sucessfully executed
+    parameters:
+      description:
+        description: aws-cli
+        type: string
+      timeout:
+        description: timeout
+        type: integer
+        default: 60
+      seconds-between-retries:
+        description: seconds
+        type: integer
+        default: 1
+      sh-command:
+        description: |
+          aws cloudformation deploy \
+            --template-file .circleci/files/backend.yml \
+            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+            --tags project=udapeople
+        type: string
+        default: 'true'
+    steps:
+      - run:
+          name: Wait for <<parameters.description>>
+          command: |
+            timeout <<parameters.timeout>> sh -c \
+              'until <<parameters.sh-command>>; do
+                echo "Waiting for <<parameters.description>> ..."
+                sleep <<parameters.seconds-between-retries>>
+              done'
+
   destroy-env:
     description: this will destroy the backend when there the smoke test fails
     steps:
@@ -125,14 +157,7 @@ jobs:
     steps:
       - checkout
       - run: yum install tar gzip -y
-      - run:
-          name: Ensure backend exist
-          command: |
-            aws cloudformation deploy \
-            --template-file .circleci/files/backend.yml \
-            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
+      - wait-for-backend    
       - run:
           name: Ensure frontend exist
           command: |
@@ -141,7 +166,6 @@ jobs:
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
             --tags project=udapeople
-      - wait-for/aws-cli
       - run:
           name: generate instance IP
           command: |
