@@ -157,8 +157,7 @@ jobs:
     executor: aws-exec-env
     steps:
       - checkout
-      - run: yum install tar gzip -y
-      - wait-for-backend    
+      - run: yum install tar gzip -y    
       - run:
           name: Ensure frontend exist
           command: |
@@ -167,6 +166,7 @@ jobs:
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
             --tags project=udapeople
+       - wait-for-backend
       - run:
           name: generate instance IP
           command: |
