@@ -333,12 +333,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Promote deployment
+          name: Update cloudfront distribution
           command: |
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
             --stack-name InitialStack \
-            --parameter-overrides WorkflowID="udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
+            --parameter-overrides WorkflowID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
             --tags project=udapeople
 
 workflows:
