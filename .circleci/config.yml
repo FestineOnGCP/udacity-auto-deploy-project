@@ -14,12 +14,27 @@ commands:
             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
           when: on_fail
       - run:
+          name: Empty bucket
+          command: |
+            aws s3 rm s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
+          when: on_fail
+      - run:
           name: destroy frontend
           command: |
             aws s3 rm s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
             aws cloudformation delete-stack \
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           when: on_fail
+
+  install-aws-cli:
+    description: this is for modularity of the aws-cli installation
+    steps:
+      - run:
+          name: Install aws-cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
 
   revert-migration:
     description: revert the migration of the backend
@@ -219,12 +234,7 @@ jobs:
           name: install dependencies
           command: |
             sudo apt install -y tar gzip unzip
-      - run:
-          name: Install aws-cli
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+      - install-aws-cli
       - restore-frontend-cache
       - run:
           name: get backend url
@@ -234,9 +244,14 @@ jobs:
             --filter 'Name=tag:project,Values=udapeople' \
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
+            echo API_URL > url.txt
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - url.txt
       - run:
           name: deploy frontend
           command: |
@@ -256,12 +271,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt install -y tar gzip python3 ansible
-      - run:
-          name: Install aws-cli
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+      - install-aws-cli
       - add_ssh_keys:
           fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
       - attach_workspace:
@@ -282,6 +292,32 @@ jobs:
       - destroy-env-on-fail
       - revert-migration
       
+  smoke-test:
+    executor: node-exec-env
+    steps:
+      - checkout
+      - install-aws-cli
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Smoke test backend
+          command: |
+            if curl "${cat url.txt}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
+      - run:
+          name: Smoke test frontend
+          command: |
+            URL=http://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/#/employees
+            if curl -s ${URL} | grep "Welcome"
+            then
+              return 1
+            else
+              return 1
+            fi
 
 workflows:
   default:
