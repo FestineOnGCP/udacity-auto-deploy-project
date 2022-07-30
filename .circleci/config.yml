@@ -159,6 +159,18 @@ jobs:
       - checkout
       - run: yum install tar gzip -y
       - run:
+          name: get OldWorkflowID if it exist
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo $OldWorkflowID > workflow-id.txt
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - old-workflow-id.txt
+      - run:
           name: Ensure backend exist
           command: |
             aws cloudformation deploy \
@@ -344,13 +356,11 @@ jobs:
   cleanup:
     executor: aws-exec-env
     steps:
+      - attach_workspace:
+          at: ./
       - run:
           name: Create environment variables
           command: |
-            export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text)
-            echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"         
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
@@ -358,6 +368,7 @@ jobs:
       - run:
           name: Cleanup S3
           command: |
+            export OldWorkflowID=$(cat old-workflow-id.txt)
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
