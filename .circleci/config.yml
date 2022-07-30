@@ -42,9 +42,13 @@ commands:
       - run:
           name: revert migration
           command: |
-            cd backend
-            npm install
-            npm run migrations:revert
+            SUCCESS=$(curl --insecure https://kvdb.io/HfpYbUe8c7jq5SGjDYFgEc/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            if (( $SUCCESS == 1 ));
+            then
+                cd ~/project/backend
+                npm install
+                npm run migration:revert
+            fi  
           when: on_fail
 
   restore-frontend-cache:
@@ -324,6 +328,19 @@ jobs:
       - destroy-env-on-fail
       - revert-migration
 
+  - cloudfront-update:
+      executor: aws-exec-env
+      steps:
+        - checkout
+        - run:
+            name: Promote deployment
+            command: |
+              aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --stack-name InitialStack \
+              --parameter-overrides WorkflowID="udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
+              --tags project=udapeople
+
 workflows:
   default:
     jobs:
@@ -359,4 +376,7 @@ workflows:
           requires:
             - deploy-frontend
             - deploy-backend
+      - cloudfront-update:
+          requires:
+            - smoke-test
       
