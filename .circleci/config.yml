@@ -209,7 +209,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip
+            apk add --update tar gzip curl unzip
       - attach_workspace:
           at: .circleci/ansible
       - add_ssh_keys:
