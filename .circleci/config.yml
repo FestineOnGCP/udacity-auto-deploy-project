@@ -204,7 +204,7 @@ jobs:
           name: Run ansible playbook
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+            ansible-playbook -i inventory.txt --extra-vars "TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts" configure-server.yml
 
   run-migration:
     executor: node-exec-env
@@ -354,4 +354,5 @@ workflows:
       - deploy-backend:
           requires:
             - configure-infrastructure
+            
       
