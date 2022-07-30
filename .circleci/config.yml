@@ -328,18 +328,18 @@ jobs:
       - destroy-env-on-fail
       - revert-migration
 
-  - cloudfront-update:
-      executor: aws-exec-env
-      steps:
-        - checkout
-        - run:
-            name: Promote deployment
-            command: |
-              aws cloudformation deploy \
-              --template-file .circleci/files/cloudfront.yml \
-              --stack-name InitialStack \
-              --parameter-overrides WorkflowID="udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
-              --tags project=udapeople
+  cloudfront-update:
+    executor: aws-exec-env
+    steps:
+      - checkout
+      - run:
+          name: Promote deployment
+          command: |
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --stack-name InitialStack \
+            --parameter-overrides WorkflowID="udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
+            --tags project=udapeople
 
 workflows:
   default:
