@@ -202,14 +202,13 @@ jobs:
       - run: cat .circleci/ansible/inventory.txt
 
   configure-infrastructure:
-    executor: aws-exec-env
+    executor: ansible-exec-env
     steps:
       - checkout
-      - install-aws-cli
       - run:
           name: Install dependencies
           command: |
-            apk add --update python3
+            apk add --update tar gzip
       - attach_workspace:
           at: .circleci/ansible
       - add_ssh_keys:
@@ -223,8 +222,6 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-env-on-fail
-      - revert-migration
 
   run-migration:
     executor: node-exec-env
