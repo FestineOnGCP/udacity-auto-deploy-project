@@ -14,13 +14,9 @@ commands:
             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
           when: on_fail
       - run:
-          name: delete bucket
-          command: |
-            aws s3 rm s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket
-          when: on_fail
-      - run:
           name: destroy frontend
           command: |
+            aws s3 rm s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
             aws cloudformation delete-stack \
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           when: on_fail

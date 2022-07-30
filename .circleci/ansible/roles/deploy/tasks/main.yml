@@ -8,7 +8,7 @@
   become: yes
   copy:
     src: ../../artifact.tar.gz
-    dest: /web/
+    dest: /web
 - name: Extract file and start server
   become: yes
   ansible.builtin.shell:
