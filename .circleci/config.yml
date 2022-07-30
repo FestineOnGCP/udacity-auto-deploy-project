@@ -48,6 +48,7 @@ commands:
                 cd ~/project/backend
                 npm install
                 npm run migration:revert
+                curl --insecure https://kvdb.io/HfpYbUe8c7jq5SGjDYFgEc/migration_${CIRCLE_WORKFLOW_ID:0:7} -XDELETE
             fi  
           when: on_fail
 
@@ -221,6 +222,8 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-env-on-fail
+      - revert-migration
 
   run-migration:
     executor: node-exec-env
