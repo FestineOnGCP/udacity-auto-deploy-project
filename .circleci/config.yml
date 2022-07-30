@@ -211,7 +211,7 @@ jobs:
       - attach_workspace:
           at: .circleci/ansible
       - add_ssh_keys:
-          fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
+          fingerprints: ["18:11:ae:32:63:48:f1:59:1b:78:0a:dd:b6:27:2a:60"]
       - run:
           name: Install Ansible
           command: |
@@ -288,7 +288,7 @@ jobs:
             sudo apt install -y tar gzip python3 ansible
       - install-aws-cli
       - add_ssh_keys:
-          fingerprints: ["51:79:28:c0:b3:23:41:46:12:e1:39:d8:d9:22:ab:de"]
+          fingerprints: ["18:11:ae:32:63:48:f1:59:1b:78:0a:dd:b6:27:2a:60"]
       - attach_workspace:
           at: .circleci/ansible
       - restore-backend-cache
