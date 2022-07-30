@@ -306,7 +306,7 @@ jobs:
                 echo "Backend smoke test succeeded"
                 exit 0
             else
-                echo "Failed Backed smoke test"
+                echo "Failed Backend smoke test"
                 exit 1
             fi
       - run:
@@ -315,7 +315,8 @@ jobs:
             URL=http://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/#/employees
             if curl -s ${URL} | grep "Welcome"
             then
-              exit 1
+              echo "Frontend smoke test succeeded"
+              exit 0
             else
               echo "Failed frontend smoke test"
               exit 1
