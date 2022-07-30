@@ -16,7 +16,7 @@ commands:
       - run:
           name: Empty bucket
           command: |
-            aws s3 rm s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
           when: on_fail
       - run:
           name: destroy frontend
@@ -172,7 +172,7 @@ jobs:
             aws cloudformation deploy \
             --template-file .circleci/files/frontend.yml \
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides ID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
       - run:
           name: generate instance IP
@@ -262,7 +262,7 @@ jobs:
             npm install
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws s3 cp dist s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket --recursive
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-env-on-fail
       - revert-migration
 
@@ -316,7 +316,7 @@ jobs:
       - run:
           name: Smoke test frontend
           command: |
-            URL=http://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/#/employees
+            URL=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/#/employees
             if curl -s ${URL} | grep "Welcome"
             then
               echo "Frontend smoke test succeeded"
@@ -338,7 +338,7 @@ jobs:
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
             --stack-name InitialStack \
-            --parameter-overrides WorkflowID="festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket" \
+            --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
 
   cleanup:
@@ -360,7 +360,7 @@ jobs:
           command: |
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
-              aws s3 rm "s3://udapeople-festus-${OldWorkflowID}-bucket" --recursive
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
             else
               echo "Infra does now exist"
             fi
@@ -413,7 +413,5 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+      
       
