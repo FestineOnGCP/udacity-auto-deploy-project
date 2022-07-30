@@ -302,11 +302,13 @@ jobs:
       - run:
           name: Smoke test backend
           command: |
-            if curl "${cat url.txt}/api/status" | grep "ok"
+            if curl "$(cat url.txt)/api/status" | grep "ok"
             then
-                return 0
+                echo "Backend smoke test succeeded"
+                exit 0
             else
-                return 1
+                echo "Failed Backed smoke test"
+                exit 1
             fi
       - run:
           name: Smoke test frontend
@@ -314,10 +316,13 @@ jobs:
             URL=http://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/#/employees
             if curl -s ${URL} | grep "Welcome"
             then
-              return 1
+              exit 1
             else
-              return 1
+              echo "Failed frontend smoke test"
+              exit 1
             fi
+      - destroy-env-on-fail
+      - revert-migration
 
 workflows:
   default:
