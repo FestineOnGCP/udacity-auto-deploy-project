@@ -17,6 +17,7 @@ commands:
           name: delete bucket
           command: |
             aws s3 rm s3://udapeople-festus-${CIRCLE_WORKFLOW_ID:0:7}-bucket
+          when: on_fail
       - run:
           name: destroy frontend
           command: |
