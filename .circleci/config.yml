@@ -163,13 +163,13 @@ jobs:
           command: |
             yum install tar gzip -y
       - run:
-        name: get OldWorkflowID if it exist
-        command: |
-          export OldWorkflowID=$(aws cloudformation \
-          list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-          --no-paginate --output text)
-          echo OldWorkflowID: "${OldWorkflowID}"
-          echo $OldWorkflowID > old-workflow-id.txt
+          name: get OldWorkflowID if it exist
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo $OldWorkflowID > old-workflow-id.txt
       - persist_to_workspace:
           root: ./
           paths:
