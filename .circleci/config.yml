@@ -166,7 +166,7 @@ jobs:
           name: get OldWorkflowID if it exist
           command: |
             export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`ID\`].Value" \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
             --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo $OldWorkflowID > old-workflow-id.txt
@@ -193,9 +193,10 @@ jobs:
       - run:
           name: generate instance IP
           command: |
+            echo 
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}' \
+            --filter 'Name=tag:project,Values="udapeople-${CIRCLE_WORKFLOW_ID:0:7}"' \
             --output text \
             >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
