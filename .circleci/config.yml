@@ -386,8 +386,8 @@ jobs:
           command: |
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "udapeople-backend-$(cat old-workflow-id.txt)"
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-$(cat old-workflow-id.txt)"
             else
               echo "Infra does now exist"
             fi
