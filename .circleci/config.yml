@@ -216,7 +216,7 @@ jobs:
       - attach_workspace:
           at: .circleci/ansible
       - add_ssh_keys:
-          fingerprints: ["18:11:ae:32:63:48:f1:59:1b:78:0a:dd:b6:27:2a:60"]
+          fingerprints: ["af:0a:89:b6:b8:95:03:aa:7d:57:45:ea:1d:d6:50:b0"]
       - run:
           name: Install Ansible
           command: |
@@ -240,8 +240,12 @@ jobs:
             npm run migrations > migrations_dump.txt
       - run:
           name: Send migration status to kvdb.io OR memstash.io
-          command: |   
-            curl --insecure https://kvdb.io/4x2jEqsqyfywJ2obnErpaW/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+          command: |
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+              curl --insecure https://kvdb.io/4x2jEqsqyfywJ2obnErpaW/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            else
+              echo "Migration failed"
 
   deploy-frontend:
     executor: node-exec-env
@@ -290,7 +294,7 @@ jobs:
             sudo apt install -y tar gzip python3 ansible
       - install-aws-cli
       - add_ssh_keys:
-          fingerprints: ["18:11:ae:32:63:48:f1:59:1b:78:0a:dd:b6:27:2a:60"]
+          fingerprints: ["af:0a:89:b6:b8:95:03:aa:7d:57:45:ea:1d:d6:50:b0"]
       - attach_workspace:
           at: .circleci/ansible
       - restore-backend-cache
@@ -430,6 +434,4 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+    
