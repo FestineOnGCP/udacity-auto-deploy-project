@@ -181,7 +181,7 @@ jobs:
             --template-file .circleci/files/backend.yml \
             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople    
+            --tags project=udapeople-"${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Ensure frontend exist
           command: |
@@ -195,7 +195,7 @@ jobs:
           command: |
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
+            --filter 'Name=tag:project,Values=udapeople-"${CIRCLE_WORKFLOW_ID:0:7}"' \
             --output text \
             >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
@@ -367,7 +367,7 @@ jobs:
       - run:
           name: Create environment variables
           command: |
-            export OldWorkflowID=$(cat old-workflow-id.txt)
+            export OldWorkflowID=$(cat /root/project/old-workflow-id.txt)
             echo OldWorkflowID "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"         
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
