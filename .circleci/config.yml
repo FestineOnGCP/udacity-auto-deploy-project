@@ -375,7 +375,9 @@ jobs:
           command: |
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
-              aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
+              export BUCKET_URL="udapeople-${OldWorkflowID}"
+              echo $BUCKET_URL
+              aws s3 rm s3://$BUCKET_URL --recursive
             else
               echo "Infra does now exist"
             fi
