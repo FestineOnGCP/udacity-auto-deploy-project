@@ -166,14 +166,14 @@ jobs:
           name: get OldWorkflowID if it exist
           command: |
             export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            list-exports --query "Exports[?Name==\`ID\`].Value" \
             --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo $OldWorkflowID > old-workflow-id.txt
-      - save_cache:
+      - persist_to_workspace:
+          root: ./
           paths:
             - old-workflow-id.txt
-          key: OldWorkflowID
       - run:
           name: Ensure backend exist
           command: |
@@ -181,7 +181,7 @@ jobs:
             --template-file .circleci/files/backend.yml \
             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
+            --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Ensure frontend exist
           command: |
@@ -189,7 +189,7 @@ jobs:
             --template-file .circleci/files/frontend.yml \
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:7}
+            --tags project=udapeople
       - run:
           name: generate instance IP
           command: |
@@ -362,13 +362,12 @@ jobs:
     executor: node-exec-env
     steps:
       - install-aws-cli
-      - restore_cache:
-          keys:
-            - OldWorkflowID
+      - attach_workspace:
+          at: ./
       - run:
           name: Create environment variables
           command: |
-            export OldWorkflowID=$(cat /root/project/old-workflow-id.txt)
+            export OldWorkflowID=$(cat old-workflow-id.txt)
             echo OldWorkflowID "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"         
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
@@ -432,8 +431,6 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+      
      
       
