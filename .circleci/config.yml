@@ -55,15 +55,13 @@ commands:
   restore-frontend-cache:
     description: For cache modularity
     steps:
-      - restore_cache:
-          keys:
-            - frontend-modules
+      - attach_workspace:
+          at: ~/
   restore-backend-cache:
     description: For cache modularity
     steps:
-      - restore_cache:
-          keys:
-            - backend-modules
+      - attach_workspace:
+        at: ~/
 
 
   build:
@@ -112,10 +110,10 @@ jobs:
     steps:
       - checkout
       - build
-      - save_cache:
+      - persist_to_workspace:
+          root: ~/
           paths: 
             - frontend/node_modules
-          key: frontend-modules
   test-frontend:
     executor: node-exec-env
     steps:
@@ -137,10 +135,10 @@ jobs:
     steps:
       - checkout
       - build
-      - save_cache:
+      - persist_to_workspace:
+          root: ~/
           paths: 
             - backend/node_modules
-          key: backend-modules
   test-backend:
     executor: node-exec-env
     steps:
