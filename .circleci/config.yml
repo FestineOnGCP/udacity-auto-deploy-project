@@ -364,6 +364,8 @@ jobs:
       - run:
           name: Create environment variables
           command: |
+            export OldWorkflowID=$(cat old-workflow-id.txt)
+            echo OldWorkflowID "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"         
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
@@ -371,13 +373,11 @@ jobs:
       - run:
           name: Cleanup S3
           command: |
-            export OldWorkflowID=$(cat old-workflow-id.txt)
             echo OldWorkflowID "${OldWorkflowID}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
-              export BUCKET_URL="udapeople-$(cat old-workflow-id.txt)"
-              echo $BUCKET_URL
-              aws s3 rm s3://$BUCKET_URL --recursive
+              echo OldWorkflowID "${OldWorkflowID}"
+              aws s3 rm s3://udapeople-$(cat old-workflow-id.txt) --recursive
             else
               echo "Infra does now exist"
             fi
