@@ -166,7 +166,7 @@ jobs:
           name: get OldWorkflowID if it exist
           command: |
             export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            list-exports --query "Exports[?Name==\`ID\`].Value" \
             --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo $OldWorkflowID > old-workflow-id.txt
