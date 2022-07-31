@@ -56,12 +56,12 @@ commands:
     description: For cache modularity
     steps:
       - attach_workspace:
-          at: ~/
+          at: ./
   restore-backend-cache:
     description: For cache modularity
     steps:
       - attach_workspace:
-          at: ~/
+          at: ./
 
 
   build:
@@ -113,7 +113,7 @@ jobs:
       - persist_to_workspace:
           root: ./
           paths: 
-            - frontend/node_modules
+            - node_modules
   test-frontend:
     executor: node-exec-env
     steps:
@@ -138,7 +138,7 @@ jobs:
       - persist_to_workspace:
           root: ./
           paths: 
-            - backend/node_modules
+            - node_modules
   test-backend:
     executor: node-exec-env
     steps:
