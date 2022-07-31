@@ -63,55 +63,6 @@ commands:
       - attach_workspace:
           at: backend/
 
-
-  build:
-    description: For build command modularity
-    steps:
-      - run:
-          name: Build frontend
-          command: |
-            cd frontend
-            npm install
-            npm run build
-      - run:
-          name: Build backend
-          command: |
-            cd backend
-            npm install
-            npm run build
-  test:
-    description: For test command modularity
-    steps:
-      - run:
-          name: Test frontend
-          command: |
-            cd frontend
-            npm install
-            npm run test
-      - run:
-          name: Test backend
-          command: |
-            cd backend
-            npm install
-            npm run test
-  scan:
-    description: For scan command modularity
-    steps:
-      - run:
-          name: scan frontend
-          command: |
-            cd frontend
-            npm install
-            npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical
-      - run:
-          name: scan backend
-          command: |
-            cd backend
-            npm install
-            npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical
-
 executors:
   aws-exec-env:
     docker:
@@ -128,7 +79,12 @@ jobs:
     executor: node-exec-env
     steps:
       - checkout
-      - build
+      - run:
+          name: Build frontend
+          command: |
+            cd frontend
+            npm install
+            npm run build
       - persist_to_workspace:
           root: frontend/
           paths: 
@@ -138,13 +94,24 @@ jobs:
     steps:
       - checkout
       - restore-frontend-cache
-      - test
+      - run:
+          name: Test frontend
+          command: |
+            cd frontend
+            npm install
+            npm run test
   scan-frontend:
     executor: node-exec-env
     steps:
       - checkout
       - restore-frontend-cache
-      - scan
+      - run:
+          name: scan frontend
+          command: |
+            cd frontend
+            npm install
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
       - slack/notify:
           event: fail
           template: basic_fail_1
@@ -153,7 +120,12 @@ jobs:
     executor: node-exec-env
     steps:
       - checkout
-      - build
+      - run:
+          name: Build backend
+          command: |
+            cd backend
+            npm install
+            npm run build
       - persist_to_workspace:
           root: backend/
           paths: 
@@ -163,13 +135,24 @@ jobs:
     steps:
       - checkout
       - restore-backend-cache
-      - test
+      - run:
+        name: Test backend
+        command: |
+          cd backend
+          npm install
+          npm run test
   scan-backend:
     executor: node-exec-env
     steps:
       - checkout
       - restore-backend-cache
-      - scan
+      - run:
+          name: scan backend
+          command: |
+            cd backend
+            npm install
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
 
   deploy-infrastructure:
     executor: aws-exec-env
