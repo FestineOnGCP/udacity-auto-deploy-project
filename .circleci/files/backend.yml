@@ -41,4 +41,4 @@ Outputs:
     Value: !Sub ${ID}
     Description: Save the Workflow_ID
     Export: 
-      Name: ID
+      Name: !Sub ID-${ID}

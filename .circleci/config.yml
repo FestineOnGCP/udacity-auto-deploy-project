@@ -181,7 +181,7 @@ jobs:
             --template-file .circleci/files/backend.yml \
             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
+            --tags project="udapeople${CIRCLE_WORKFLOW_ID}"
       - run:
           name: Ensure frontend exist
           command: |
@@ -196,7 +196,7 @@ jobs:
             echo 
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
+            --filter 'Name=tag:project,Values="udapeople${CIRCLE_WORKFLOW_ID}"' \
             --output text \
             >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
@@ -258,7 +258,7 @@ jobs:
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
+            --filter 'Name=tag:project,Values="udapeople${CIRCLE_WORKFLOW_ID}"' \
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL > url.txt
