@@ -158,7 +158,6 @@ jobs:
     executor: aws-exec-env
     steps:
       - checkout
-      - run: yum install tar gzip -y
       - run:
           name: get OldWorkflowID if it exist
           command: |
@@ -171,6 +170,7 @@ jobs:
           root: ./
           paths:
             - old-workflow-id.txt
+      - run: yum install tar gzip -y
       - run:
           name: Ensure backend exist
           command: |
