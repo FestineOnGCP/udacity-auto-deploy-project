@@ -355,8 +355,9 @@ jobs:
             --tags project=udapeople
 
   cleanup:
-    executor: aws-exec-env
+    executor: node-exec-env
     steps:
+      - install-aws-cli
       - attach_workspace:
           at: ./
       - run:
