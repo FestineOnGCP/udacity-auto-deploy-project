@@ -158,7 +158,10 @@ jobs:
     executor: aws-exec-env
     steps:
       - checkout
-      - run: yum install tar gzip -y
+      - run: 
+          name: install dependencies
+          command: |
+            yum install tar gzip -y
       - run:
         name: get OldWorkflowID if it exist
         command: |
