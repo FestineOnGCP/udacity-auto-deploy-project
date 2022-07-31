@@ -111,7 +111,7 @@ jobs:
       - checkout
       - build
       - persist_to_workspace:
-          root: ~/
+          root: ./
           paths: 
             - frontend/node_modules
   test-frontend:
@@ -136,7 +136,7 @@ jobs:
       - checkout
       - build
       - persist_to_workspace:
-          root: ~/
+          root: ./
           paths: 
             - backend/node_modules
   test-backend:
