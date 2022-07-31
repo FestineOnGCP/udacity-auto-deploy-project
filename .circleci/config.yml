@@ -113,7 +113,7 @@ jobs:
       - persist_to_workspace:
           root: frontend/
           paths: 
-            - node_modules
+            - node_modules/
   test-frontend:
     executor: node-exec-env
     steps:
@@ -138,7 +138,7 @@ jobs:
       - persist_to_workspace:
           root: backend/
           paths: 
-            - node_modules
+            - node_modules/
   test-backend:
     executor: node-exec-env
     steps:
