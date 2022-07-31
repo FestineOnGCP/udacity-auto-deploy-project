@@ -37,7 +37,8 @@ Resources:
           Value: !Sub backend-${ID}
 
 Outputs:
-  Value: !Sub ${ID}
-  Description: Save the Workflow_ID
-  Export: 
-    Name: ID
+  ID:
+    Value: !Sub ${ID}
+    Description: Save the Workflow_ID
+    Export: 
+      Name: ID
