@@ -68,27 +68,46 @@ commands:
     description: For build command modularity
     steps:
       - run:
-          name: Build frontend and backend
+          name: Build frontend
           command: |
             cd frontend
+            npm install
+            npm run build
+      - run:
+          name: Build backend
+          command: |
+            cd backend
             npm install
             npm run build
   test:
     description: For test command modularity
     steps:
       - run:
-          name: Test frontend and backend
+          name: Test frontend
           command: |
             cd frontend
+            npm install
+            npm run test
+      - run:
+          name: Test backend
+          command: |
+            cd backend
             npm install
             npm run test
   scan:
     description: For scan command modularity
     steps:
       - run:
-          name: scan frontend and backend
+          name: scan frontend
           command: |
             cd frontend
+            npm install
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
+      - run:
+          name: scan backend
+          command: |
+            cd backend
             npm install
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
