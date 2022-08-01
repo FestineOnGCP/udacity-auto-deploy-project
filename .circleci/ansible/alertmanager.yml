@@ -1,5 +1,6 @@
 ---
 - name: Setup Alertmanager
+  user: ubuntu
   hosts: web
   become: yes
   become_method: sudo
