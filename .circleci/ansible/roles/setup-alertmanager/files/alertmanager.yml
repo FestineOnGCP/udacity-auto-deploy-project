@@ -1,0 +1,13 @@
+route:
+  group_by: [Testing]
+  receiver: email-me
+
+receivers:
+- name: email-me
+  email_configs:
+  - to: festus.udomoh@yahoo.com
+    from: festus.udomoh@gmail.com
+    smarthost: smtp.gmail.com:587
+    auth_username: festus.udomoh@gmail.com
+    auth_identity: festus.udomoh@gmail.com
+    auth_password: fvisxhzjytmgeneq

@@ -223,6 +223,22 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt node-exporter.yml
 
+  alertmanager:
+    executor: ansible-exec-env
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            apk add --update tar gzip ansible
+      - add_ssh_keys:
+          fingerprints: ["af:0a:89:b6:b8:95:03:aa:7d:57:45:ea:1d:d6:50:b0"]
+      - run:
+          name: Run alertmanager playbook
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i prometheus-inventory.txt alertmanager.yml
+
   configure-infrastructure:
     executor: ansible-exec-env
     steps:
