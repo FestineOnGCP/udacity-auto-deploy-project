@@ -17,13 +17,6 @@
     src: alertmanager.service
     dest: /etc/systemd/system/alertmanager.service
 
-- name: Copy prometheus.yml
-  become: yes
-  copy:
-    src: prometheus.yml
-    dest: /etc/prometheus/prometheus.yml
-    backup: yes
-
 - name: Install Alertmanager
   become: yes
   shell:
