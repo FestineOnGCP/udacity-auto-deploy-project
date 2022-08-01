@@ -205,6 +205,23 @@ jobs:
             - inventory.txt
       - run: cat .circleci/ansible/inventory.txt
 
+  node-exporter:
+    executor: ansible-exec-env
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            apk add --update tar gzip ansible
+      - attach_workspace:
+          at: .circleci/ansible
+      - add_ssh_keys:
+          fingerprints: ["af:0a:89:b6:b8:95:03:aa:7d:57:45:ea:1d:d6:50:b0"]
+      - run:
+          name: Run node-exporter playbook
+          command: |
+            ansible-playbook -i inventory.txt node-exporter.yml
+
   configure-infrastructure:
     executor: ansible-exec-env
     steps:
@@ -241,7 +258,7 @@ jobs:
       - run:
           name: Send migration status to kvdb.io OR memstash.io
           command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            if grep -q "added 111 packages" ~/project/backend/migrations_dump.txt
             then
               curl --insecure https://kvdb.io/4x2jEqsqyfywJ2obnErpaW/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             else
@@ -416,6 +433,9 @@ workflows:
           requires:
             - build-backend
       - deploy-infrastructure
+      - node-exporter:
+          requires:
+            - deploy-infrastructure
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
