@@ -1,6 +1,7 @@
 ---
 - name: Start node-exporter play
   user: ubuntu
+  hosts: web
   become: yes
   become_method: sudo
   become_user: root
