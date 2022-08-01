@@ -5,6 +5,12 @@
     src: alertmanager.yml
     dest: /etc/prometheus/alertmanager.yml
 
+- name: Copy rules.yml
+  become: yes
+  copy:
+    src: rules.yml
+    dest: /etc/prometheus/rules.yml
+
 - name: Copy alertmanager.service
   become: yes
   copy:
