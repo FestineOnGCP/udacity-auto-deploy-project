@@ -435,6 +435,9 @@ workflows:
           requires:
             - build-backend
       - deploy-infrastructure
+      - node-exporter:
+          requires:
+            - deploy-infrastructure
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
@@ -454,7 +457,5 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
-      - node-exporter:
-          requires:
-            - cloudfront-update
+     
     
