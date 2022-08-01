@@ -220,6 +220,7 @@ jobs:
       - run:
           name: Run node-exporter playbook
           command: |
+            cd .circleci/ansible
             ansible-playbook -i inventory.txt node-exporter.yml
 
   configure-infrastructure:
@@ -258,7 +259,8 @@ jobs:
       - run:
           name: Send migration status to kvdb.io OR memstash.io
           command: |
-            if grep -q "added 111 packages" ~/project/backend/migrations_dump.txt
+            cd backend
+            if grep -q "added" migrations_dump.txt
             then
               curl --insecure https://kvdb.io/4x2jEqsqyfywJ2obnErpaW/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             else
