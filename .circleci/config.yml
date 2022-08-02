@@ -204,24 +204,7 @@ jobs:
           paths:
             - inventory.txt
       - run: cat .circleci/ansible/inventory.txt
-      - run:
-          name: get backend url
-          command: |
-            echo "backend-${CIRCLE_WORKFLOW_ID:0:7}" > text.txt
-            export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:Name,Values=$(cat text.txt)' \
-            --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo $API_URL > url.txt
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - url.txt
-
+     
   node-exporter:
     executor: ansible-exec-env
     steps:
@@ -356,17 +339,39 @@ jobs:
       - checkout
       - install-aws-cli
       - attach_workspace:
-          at: ./
+          at: .circleci/ansible
       - run:
-          name: Smoke test backend
+          name: get backend urls
           command: |
-            if curl "$(cat url.txt)/api/status" | grep "ok"
+            sed -n 1p inventory.txt > url1.txt
+            sed -n 2p inventory.txt > url2.txt
+            export API_URL1="http://$(cat url1.txt):3030"
+            export API_URL2="http://$(cat url2.txt):3030"
+            echo $API_URL1 > url1.txt
+            echo $API_URL2 > url2.txt
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+            cat url1.txt
+            cat url2.txt
+      - run:
+          name: Smoke test backend one
+          command: |
+            if curl "$(cat url1.txt)/api/status" | grep "ok"
             then
                 echo "Backend smoke test succeeded"
                 exit 0
             else
                 echo "Failed Backend smoke test"
                 exit 1
+            fi
+      - run:
+          name: Smoke test backend two
+          command: |
+            if curl "$(cat url2.txt)/api/status" | grep "ok"
+            then
+                echo "Backend smoke test succeeded"
+            else
+                echo "Failed Backend smoke test"
             fi
       - run:
           name: Smoke test frontend
