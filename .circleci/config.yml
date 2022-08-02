@@ -207,22 +207,20 @@ jobs:
       - run:
           name: get backend url
           command: |
+            echo "backend-${CIRCLE_WORKFLOW_ID:0:7}" > text.txt
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
+            --filter 'Name=tag:Name,Values=$(cat text.txt)' \
             --output text)
-            arrIN=(${BACKEND_IP// / })
-            export API_URL1="http://${arrIN[0]}:3030"
-            echo $API_URL1 > url1.txt
-            export API_URL2="http://${arrIN[1]}:3030"
-            echo $API_URL2 > url2.txt
-            cat url1.txt
-            cat url2.txt
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo $API_URL > url.txt
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - persist_to_workspace:
           root: ./
           paths:
-            - url1.txt
-            - url2.txt
+            - url.txt
 
   node-exporter:
     executor: ansible-exec-env
@@ -362,16 +360,7 @@ jobs:
       - run:
           name: Smoke test backend
           command: |
-            if curl "$(cat url1.txt)/api/status" | grep "ok"
-            then
-                echo "Backend smoke test succeeded"
-                exit 0
-            else
-                echo "Failed Backend smoke test"
-                exit 1
-            fi
-
-            if curl "$(cat url2.txt)/api/status" | grep "ok"
+            if curl "$(cat url.txt)/api/status" | grep "ok"
             then
                 echo "Backend smoke test succeeded"
                 exit 0
