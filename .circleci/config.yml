@@ -343,8 +343,8 @@ jobs:
       - run:
           name: get backend urls
           command: |
-            sed -n 1p inventory.txt > url1.txt
-            sed -n 2p inventory.txt > url2.txt
+            sed -n 2p inventory.txt > url1.txt
+            sed -n 3p inventory.txt > url2.txt
             export API_URL1="http://$(cat url1.txt):3030"
             export API_URL2="http://$(cat url2.txt):3030"
             echo $API_URL1 > url1.txt
