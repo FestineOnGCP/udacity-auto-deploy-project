@@ -175,22 +175,6 @@ jobs:
           paths:
             - old-workflow-id.txt
       - run:
-          name: get backend url
-          command: |
-            export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
-            --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo $API_URL > url.txt
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - url.txt
-      - run:
           name: Ensure backend exist
           command: |
             aws cloudformation deploy \
@@ -263,6 +247,22 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update tar gzip
+      - run:
+          name: get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filter 'Name=tag:Name,Values="backend-${CIRCLE_WORKFLOW_ID:0:7}"' \
+            --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo $API_URL > url.txt
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - url.txt
       - attach_workspace:
           at: .circleci/ansible
       - add_ssh_keys:
