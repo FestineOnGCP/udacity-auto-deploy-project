@@ -343,6 +343,7 @@ jobs:
       - run:
           name: get backend urls
           command: |
+            cd .circleci/ansible
             sed -n 2p inventory.txt > url1.txt
             sed -n 3p inventory.txt > url2.txt
             export API_URL1="http://$(cat url1.txt):3030"

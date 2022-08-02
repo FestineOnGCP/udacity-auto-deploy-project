@@ -20,6 +20,7 @@
       npm install
 
 - name: Start application
+  become: yes
   shell:
     cmd: |
       pm2 stop default
