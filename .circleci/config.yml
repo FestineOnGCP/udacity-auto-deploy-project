@@ -174,7 +174,7 @@ jobs:
           root: ./
           paths:
             - old-workflow-id.txt
-       - run:
+      - run:
           name: get backend url
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
