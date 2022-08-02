@@ -174,6 +174,22 @@ jobs:
           root: ./
           paths:
             - old-workflow-id.txt
+       - run:
+          name: get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filter 'Name=tag:project,Values=udapeople' \
+            --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo $API_URL > url.txt
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - url.txt
       - run:
           name: Ensure backend exist
           command: |
@@ -293,22 +309,6 @@ jobs:
             sudo apt install -y tar gzip unzip
       - install-aws-cli
       - restore-frontend-cache
-      - run:
-          name: get backend url
-          command: |
-            export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
-            --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo $API_URL > url.txt
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - url.txt
       - run:
           name: deploy frontend
           command: |
