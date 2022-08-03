@@ -344,14 +344,12 @@ jobs:
           name: get backend urls
           command: |
             cd .circleci/ansible
-            sed -n 2p inventory.txt > url1.txt
-            sed -n 3p inventory.txt > url2.txt
+            sed -n 2p inventory.txt > url1
+            sed -n 3p inventory.txt > url2
             export API_URL1="http://$(cat url1.txt):3030"
             export API_URL2="http://$(cat url2.txt):3030"
             echo $API_URL1 > url1.txt
             echo $API_URL2 > url2.txt
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
             cat url1.txt
             cat url2.txt
       - run:

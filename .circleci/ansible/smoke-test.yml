@@ -1,0 +1,28 @@
+---
+- name: Smoke test backend urls
+  user: ubuntu
+  hosts: web
+  become: true
+  become_method: sudo
+  become_user: root  
+  gather_facts: false
+
+  pre_task:
+    - name: copy inventory.txt file to the prometheus server
+      ansible.builtin.copy:
+        src: inventory.txt
+        dest: ~/
+
+  tasks:
+    - name: Test backend urls
+      become: yes
+      ansible.builtin.shell:
+        cmd: |
+          sed -n 2p inventory.txt > url1
+          sed -n 3p inventory.txt > url2
+          export API_URL1="http://$(cat url1.txt):3030"
+          export API_URL2="http://$(cat url2.txt):3030"
+          echo $API_URL1 > url1.txt
+          echo $API_URL2 > url2.txt
+          cat url1.txt
+          cat url2.txt
