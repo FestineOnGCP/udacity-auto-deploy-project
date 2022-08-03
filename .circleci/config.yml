@@ -163,6 +163,22 @@ jobs:
           command: |
             yum install tar gzip -y
       - run:
+          name: Ensure backend exist
+          command: |
+            aws cloudformation deploy \
+            --template-file .circleci/files/backend.yml \
+            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+            --tags project="udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+      - run:
+          name: Ensure frontend exist
+          command: |
+            aws cloudformation deploy \
+            --template-file .circleci/files/frontend.yml \
+            --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+            --tags project=udapeople
+      - run:
           name: get OldWorkflowID if it exist
           command: |
             export OldWorkflowID=$(aws cloudformation \
@@ -175,28 +191,11 @@ jobs:
           paths:
             - old-workflow-id.txt
       - run:
-          name: Ensure backend exist
-          command: |
-            aws cloudformation deploy \
-            --template-file .circleci/files/backend.yml \
-            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
-      - run:
-          name: Ensure frontend exist
-          command: |
-            aws cloudformation deploy \
-            --template-file .circleci/files/frontend.yml \
-            --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-            --tags project=udapeople
-      - run:
           name: generate instance IP
           command: |
-            echo 
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter 'Name=tag:project,Values=udapeople' \
+            --filter Name=tag:project,Values="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
             --output text \
             >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
@@ -204,6 +203,7 @@ jobs:
           paths:
             - inventory.txt
       - run: cat .circleci/ansible/inventory.txt
+      - destroy-env-on-fail
      
   node-exporter:
     executor: ansible-exec-env
@@ -222,6 +222,7 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt node-exporter.yml
+      - destroy-env-on-fail
 
   alertmanager:
     executor: ansible-exec-env
@@ -260,6 +261,7 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-env-on-fail
 
   run-migration:
     executor: node-exec-env
@@ -282,6 +284,7 @@ jobs:
             else
               echo "Migration failed"
             fi
+      - destroy-env-on-fail
 
   deploy-frontend:
     executor: node-exec-env
@@ -294,6 +297,22 @@ jobs:
       - install-aws-cli
       - restore-frontend-cache
       - run:
+          name: Get backend URL
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filter Name=tag:project,Values="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo $API_URL > url.txt
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - url.txt
+      - run:
           name: deploy frontend
           command: |
             cd frontend
@@ -302,7 +321,6 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-env-on-fail
-      - revert-migration
 
   deploy-backend:
     executor: node-exec-env
@@ -331,25 +349,30 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-env-on-fail
-      - revert-migration
       
   smoke-test:
     executor: node-exec-env
     steps:
       - checkout
       - install-aws-cli
-      - attach_workspace:
-          at: .circleci/ansible
       - run:
           name: Install dependencies
           command: |
             sudo apt install -y tar gzip python3 ansible
+      - attach_workspace:
+          at: ./
       - run:
-          name: Smoke test backend
+          name: Run smoke test on backend
           command: |
-            cd .circleci/ansible
-            ansible-playbook -i inventory.txt smoke-test.yml > ansible-dump.txt
-            cat ansible-dump.txt
+            BACKEND_IP=$(cat url.txt)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
       - run:
           name: Smoke test frontend
           command: |
@@ -377,6 +400,8 @@ jobs:
             --stack-name InitialStack \
             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
+      - destroy-env-on-fail
+      - revert-migration
 
   cleanup:
     executor: node-exec-env
@@ -425,37 +450,38 @@ workflows:
       - scan-frontend:
           context: slack-secret
           requires:
-            - build-frontend
+            - test-frontend
       - build-backend
       - test-backend:
           requires:
             - build-backend
       - scan-backend:
           requires:
-            - build-backend
-      - deploy-infrastructure
+            - test-backend
+      - deploy-infrastructure:
+          requires:
+            - scan-backend
+            - scan-backend
       - node-exporter:
           requires:
             - deploy-infrastructure
-      - alertmanager:
-          requires:
-            - deploy-infrastructure
+      - alertmanager
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
-      - run-migration:
-          requires:
-            - build-backend
       - deploy-frontend:
           requires:
-            - deploy-infrastructure
+            - configure-infrastructure
       - deploy-backend:
           requires:
             - configure-infrastructure
+      - run-migration:
+          requires:
+            - deploy-backend
+            - deploy-frontend
       - smoke-test:
           requires:
-            - deploy-frontend
-            - deploy-backend
+            - run-migration
       - cloudfront-update:
           requires:
             - smoke-test
