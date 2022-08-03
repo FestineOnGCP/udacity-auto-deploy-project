@@ -7,7 +7,7 @@
   become_user: root  
   gather_facts: false
 
-  pre_task:
+  pre_tasks:
     - name: copy inventory.txt file to the prometheus server
       ansible.builtin.copy:
         src: inventory.txt
