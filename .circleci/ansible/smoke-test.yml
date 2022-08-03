@@ -9,14 +9,15 @@
 
   pre_tasks:
     - name: copy inventory.txt file to the prometheus server
-      ansible.builtin.copy:
+      become: yes
+      copy:
         src: inventory.txt
         dest: ~/
 
   tasks:
     - name: Test backend urls
       become: yes
-      ansible.builtin.shell:
+      shell:
         cmd: |
           cd ~/
           sed -n 2p inventory.txt > url1
@@ -30,7 +31,7 @@
 
     - name: Run smoke test url1
       become: yes
-      ansible.builtin.shell:
+      shell:
         cmd: |
           cd ~/
           if curl "$(cat url1.txt)/api/status" | grep "ok"
@@ -44,7 +45,7 @@
 
     - name: Run smoke test url2
       become: yes
-      ansible.builtin.shell:
+      shell:
         cmd: |
           cd ~/
           if curl "$(cat url1.txt)/api/status" | grep "ok"
