@@ -9,17 +9,23 @@
 
 
   tasks:
+    - name: Create directory
+      become: yes
+      file:
+        path: ~/app
+        state: directory
+
     - name: copy inventory.txt file to the prometheus server
       become: yes
       copy:
         src: inventory.txt
-        dest: ~/
+        dest: ~/app
 
     - name: Test backend urls
       become: yes
       shell:
         cmd: |
-          cd ~/
+          cd ~/app
           sed -n 2p inventory.txt > url1
           sed -n 3p inventory.txt > url2
           export API_URL1="http://$(cat url1.txt):3030"
@@ -33,7 +39,7 @@
       become: yes
       shell:
         cmd: |
-          cd ~/
+          cd ~/app
           if curl "$(cat url1.txt)/api/status" | grep "ok"
             then
                 echo "Backend smoke test succeeded"
@@ -47,7 +53,7 @@
       become: yes
       shell:
         cmd: |
-          cd ~/
+          cd ~/app
           if curl "$(cat url1.txt)/api/status" | grep "ok"
             then
                 echo "Backend smoke test succeeded"
