@@ -348,7 +348,8 @@ jobs:
           name: Smoke test backend
           command: |
             cd .circleci/ansible
-            ansible-playbook -i prometheus-inventory.txt smoke-test.yml
+            ansible-playbook -i invetory.txt smoke-test.yml > ansible-dump.txt
+            cat ansible-dump.txt
       - run:
           name: Smoke test frontend
           command: |
