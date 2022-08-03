@@ -341,10 +341,14 @@ jobs:
       - attach_workspace:
           at: .circleci/ansible
       - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y tar gzip python3 ansible
+      - run:
           name: Smoke test backend
           command: |
             cd .circleci/ansible
-            ansible_playbook -i prometheus-inventory smoke-test.yml
+            ansible-playbook -i prometheus-inventory smoke-test.yml
       - run:
           name: Smoke test frontend
           command: |
