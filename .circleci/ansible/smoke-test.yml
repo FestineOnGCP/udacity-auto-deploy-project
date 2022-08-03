@@ -18,6 +18,7 @@
       become: yes
       ansible.builtin.shell:
         cmd: |
+          cd ~/
           sed -n 2p inventory.txt > url1
           sed -n 3p inventory.txt > url2
           export API_URL1="http://$(cat url1.txt):3030"
@@ -26,3 +27,31 @@
           echo $API_URL2 > url2.txt
           cat url1.txt
           cat url2.txt
+
+    - name: Run smoke test url1
+      become: yes
+      ansible.builtin.shell:
+        cmd: |
+          cd ~/
+          if curl "$(cat url1.txt)/api/status" | grep "ok"
+            then
+                echo "Backend smoke test succeeded"
+                exit 0
+            else
+                echo "Failed Backend smoke test"
+                exit 1
+            fi
+
+    - name: Run smoke test url2
+      become: yes
+      ansible.builtin.shell:
+        cmd: |
+          cd ~/
+          if curl "$(cat url1.txt)/api/status" | grep "ok"
+            then
+                echo "Backend smoke test succeeded"
+                exit 0
+            else
+                echo "Failed Backend smoke test"
+                exit 0
+            fi

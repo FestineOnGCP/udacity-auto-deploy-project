@@ -341,37 +341,10 @@ jobs:
       - attach_workspace:
           at: .circleci/ansible
       - run:
-          name: get backend urls
+          name: Smoke test backend
           command: |
             cd .circleci/ansible
-            sed -n 2p inventory.txt > url1
-            sed -n 3p inventory.txt > url2
-            export API_URL1="http://$(cat url1.txt):3030"
-            export API_URL2="http://$(cat url2.txt):3030"
-            echo $API_URL1 > url1.txt
-            echo $API_URL2 > url2.txt
-            cat url1.txt
-            cat url2.txt
-      - run:
-          name: Smoke test backend one
-          command: |
-            if curl "$(cat url1.txt)/api/status" | grep "ok"
-            then
-                echo "Backend smoke test succeeded"
-                exit 0
-            else
-                echo "Failed Backend smoke test"
-                exit 1
-            fi
-      - run:
-          name: Smoke test backend two
-          command: |
-            if curl "$(cat url2.txt)/api/status" | grep "ok"
-            then
-                echo "Backend smoke test succeeded"
-            else
-                echo "Failed Backend smoke test"
-            fi
+            ansible_playbook -i prometheus-inventory smoke-test.yml
       - run:
           name: Smoke test frontend
           command: |
