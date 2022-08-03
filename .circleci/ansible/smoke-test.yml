@@ -24,8 +24,7 @@
       shell:
         cmd: |
           dig +short myip.opendns.com @resolver1.opendns.com > url.txt
-          URL="http://$(cat url.txt):9090"
-          if curl "$URL/api/status" | grep "ok"
+          # if curl "http://$(cat url.txt):3030/api/status" | grep "ok"
           then
               echo "Backend smoke test succeeded"
               exit 0

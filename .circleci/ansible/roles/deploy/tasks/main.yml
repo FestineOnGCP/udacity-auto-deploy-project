@@ -23,6 +23,5 @@
   become: yes
   shell:
     cmd: |
-      pm2 stop default
-      pm2 start npm -- start
-      pm2 list | cat
+      cd ~/web
+      npm start&
