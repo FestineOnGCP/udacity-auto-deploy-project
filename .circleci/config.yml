@@ -369,9 +369,11 @@ jobs:
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+                echo "Backend smoke test successful"
+                exit 0
             else
-                return 1
+                echo "Backend smoke test failed"
+                exit 1
             fi
       - run:
           name: Smoke test frontend
@@ -461,7 +463,7 @@ workflows:
       - deploy-infrastructure:
           requires:
             - scan-backend
-            - scan-backend
+            - scan-frontend
       - node-exporter:
           requires:
             - deploy-infrastructure
