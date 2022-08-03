@@ -7,14 +7,14 @@
   become_user: root  
   gather_facts: false
 
-  pre_tasks:
+
+  tasks:
     - name: copy inventory.txt file to the prometheus server
       become: yes
       copy:
         src: inventory.txt
         dest: ~/
 
-  tasks:
     - name: Test backend urls
       become: yes
       shell:
